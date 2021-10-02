@@ -9,7 +9,9 @@ import peersim.core.Control;
 import peersim.core.Network;
 import peersim.util.IncrementalStats;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -41,14 +43,16 @@ public class SummaryLogger implements Control {
     private final ErrorStats errorStats = new ErrorStats();
     private final IncrementalStats gtStats = new IncrementalStats();
 
-    private final double[][] buffer;
+    private final Double[][] buffer;
+    private BufferedWriter bufferedWriter;
 
 
     public SummaryLogger(String name) {
         protocolID = Configuration.getPid(name + "." + PAR_PROT);
 
         bufferSize = Configuration.getInt(name + "." + PAR_BUFFER_SIZE, 1);
-        buffer = new double[bufferSize][2];
+        buffer = new Double[bufferSize][2];
+
 
         gtFunction = Configuration.getString(name + "." + PAR_GT_FUNCTION, "avg");
 
@@ -79,6 +83,18 @@ public class SummaryLogger implements Control {
         } catch (IOException e) {
             System.err.println("Could not create the file.");
         }
+
+
+        try {
+            File logFile = new File(outputDir + mseLogfile);
+            FileWriter logFileWriter = new FileWriter(logFile);
+            bufferedWriter = new BufferedWriter(logFileWriter);
+            System.out.println("Buffer created correctly");
+        } catch(IOException e){
+            System.out.println("Could not open the file.");
+        }
+
+
 
         path = Paths.get(outputDir + mseLogfile);
         try {
@@ -124,7 +140,13 @@ public class SummaryLogger implements Control {
             // Write buffer to string
             for (int j = 0; j <= CommonState.getIntTime() % bufferSize; j++) {
                 gtString.append(buffer[j][0]).append("\n");
-                mseString.append(buffer[j][1]).append("\n");
+                //mseString.append(buffer[j][1]).append("\n");
+                try{
+                    bufferedWriter.write(buffer[j][0].toString());
+                    bufferedWriter.newLine();
+                } catch(IOException e){
+                    System.out.println("Could not write to buffer.");
+                }
             }
 
 
@@ -135,11 +157,20 @@ public class SummaryLogger implements Control {
                 System.err.println("Could not write to file.");
             }
 
-            try {
+            /*try {
                 Files.write(Paths.get(outputDir + mseLogfile),
                         (mseString.toString()).getBytes(), StandardOpenOption.APPEND);
             } catch (IOException e) {
                 System.err.println("Could not write to file.");
+            }*/
+        }
+
+        if(CommonState.getPhase() == CommonState.POST_SIMULATION){
+            System.out.println("Run after the simulation");
+            try{
+                bufferedWriter.close();
+            } catch(IOException e){
+                System.out.println("Could not close buffer.");
             }
         }
         return false;

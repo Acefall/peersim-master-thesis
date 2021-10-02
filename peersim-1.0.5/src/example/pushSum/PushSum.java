@@ -51,16 +51,8 @@ public class PushSum extends SWApproximation implements CDProtocol, Approximatio
         RandomCallModel linkable = (RandomCallModel) node.getProtocol(linkableID);
         Node peer = linkable.getCommunicationPartner(node);
 
-        double sum = 0;
-        sum += (1-keepRatio) * getS();
-        sum += keepRatio * getS();
-        if(sum != getS()){
-            System.out.println(Math.abs(sum-getS()));
-        }
-
-
-        messagePassing.putOutboundMessage(new PushMessage(node, peer, protocolID, (1-keepRatio) * getS(), (1-keepRatio) * getW()));
         messagePassing.putOutboundMessage(new PushMessage(node, node, protocolID, keepRatio * getS(), keepRatio * getW()));
+        messagePassing.putOutboundMessage(new PushMessage(node, peer, protocolID, (1-keepRatio) * getS(), (1-keepRatio) * getW()));
     }
 
     private void processInboundMessages(Node node, int protocolID) {
