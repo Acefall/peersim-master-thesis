@@ -3,33 +3,28 @@ package example.pullSum;
 
 import approximation.Approximation;
 import approximation.SWApproximation;
-import example.RandomLinkable;
-import example.messagePassingMinimize.PullRequest;
 import messagePassing.Message;
 import messagePassing.MessagePassing;
 import messagePassing.randomCallModel.PullCall;
 import messagePassing.randomCallModel.PullProtocol;
 import messagePassing.randomCallModel.RandomCallModel;
 import peersim.cdsim.CDProtocol;
-import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Pull Sum protocol inspired by Push Sum
  * Uses conservation of mass to converge to the true mean.
  */
-public class PullSum extends SWApproximation implements CDProtocol, Approximation, PullProtocol, HasWeight {
+public class PullSumNoIncoming extends SWApproximation implements CDProtocol, Approximation, PullProtocol, HasWeight {
     protected final String name;
 
 
-    public PullSum(String prefix) {
+    public PullSumNoIncoming(String prefix) {
         this.name = prefix;
     }
 
@@ -66,15 +61,17 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
             Message message = messages.next();
             if (message instanceof PullSumResponse) {
                 PullSumResponse response = (PullSumResponse) message;
-                setS(getS() + response.getS());
-                setW(getW() + response.getW());
+                if(response.getSender().getID() == response.getReceiver().getID()){
+                    setS(getS() + response.getS());
+                    setW(getW() + response.getW());
+                }
                 messages.remove();
             }
         }
     }
 
     public Object clone() {
-        PullSum pullSum = new PullSum(name);
+        PullSumNoIncoming pullSum = new PullSumNoIncoming(name);
         pullSum.messagePassing = new MessagePassing();
         return pullSum;
     }

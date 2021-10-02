@@ -14,8 +14,16 @@ public class MassObserver implements Control {
     /** Protocol identifier, obtained from config property {@link #PAR_PROT}. */
     private final int protocolID;
 
+    private double lastMass;
+
     public MassObserver(String prefix) {
         protocolID = Configuration.getPid(prefix + "." + PAR_PROT);
+
+        lastMass = 0;
+        for (int i = 0; i < Network.size(); ++i) {
+            PullSum pullSum = (PullSum) Network.get(i).getProtocol(protocolID);
+            lastMass += pullSum.getS();
+        }
     }
 
     @Override
@@ -25,7 +33,8 @@ public class MassObserver implements Control {
             PullSum pullSum = (PullSum) Network.get(i).getProtocol(protocolID);
             sum += pullSum.getS();
         }
-        System.out.println(sum);
+        System.out.println("Mass Difference " + (lastMass - sum));
+        lastMass = sum;
         return false;
     }
 }

@@ -1,7 +1,6 @@
 // Author: Alexander Weinmann uni@aweinmann.de
-package timeseries;
+package example.pullSum;
 
-import peersim.Simulator;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -10,14 +9,14 @@ import peersim.core.Network;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 /**
- * Writes the inputs of all nodes for all rounds to a log file.
+ * Write the approximation of every node to a file every round.
  */
-
-public class InputLogger implements Control {
+public class PotentialObserver implements Control {
+    /**
+     * Parameter that defines the protocol to operate on.
+     */
     private static final String PAR_PROT = "protocol";
 
     /**
@@ -27,18 +26,39 @@ public class InputLogger implements Control {
      * Defaults to 1.
      */
     private static final String PAR_BUFFER_SIZE = "bufferSize";
+
+    /**
+     * Parameter that defines the output directory.
+     */
     private static final String PAR_OUTPUT_DIR = "outputDir";
 
-
+    /**
+     * Protocol identifier, obtained from config property {@link #PAR_PROT}.
+     */
     private final int protocolID;
-    private final String outputDir;
+
+
     private final int bufferSize;
-    private final String inputsLogfile = "/inputs.csv";
+    /**
+     * The directory in which the output file is saved, obtained from {@link #PAR_OUTPUT_DIR}.
+     */
+    private final String outputDir;
+
+    /**
+     * The name of the output file for the approximations.
+     */
+    private final String weightsLogfile = "/potential.csv";
+
 
     private final double[][] buffer;
 
 
-    public InputLogger(String name) {
+    /**
+     * Reads the configuration and truncates the output file.
+     *
+     * @param name As named in the configuration file
+     */
+    public PotentialObserver(String name) {
         protocolID = Configuration.getPid(name + "." + PAR_PROT);
 
         bufferSize = Configuration.getInt(name + "." + PAR_BUFFER_SIZE, 1);
@@ -48,7 +68,7 @@ public class InputLogger implements Control {
         File dir = new File(outputDir);
         dir.mkdirs();
 
-        Path path = Paths.get(outputDir + inputsLogfile);
+        Path path = Paths.get(outputDir + weightsLogfile);
         try {
             Files.createFile(path);
         } catch (FileAlreadyExistsException ex) {
@@ -65,13 +85,31 @@ public class InputLogger implements Control {
 
     private void writeToBuffer() {
         for (int i = 0; i < Network.size(); i++) {
-            TSProtocol protocol = (TSProtocol) Network.get(i).getProtocol(protocolID);
-            buffer[CommonState.getIntTime() % bufferSize][i] = protocol.getInput();
+            PullSumVector protocol = (PullSumVector) Network.get(i).getProtocol(protocolID);
+            buffer[CommonState.getIntTime() % bufferSize][i] = potential(protocol.getContributions());
         }
+    }
+
+    private double weight(Double[] contributions){
+        double weight = 0;
+        for (int i = 0; i < contributions.length; i++) {
+            weight += contributions[i];
+        }
+        return  weight;
+    }
+
+    private double potential(Double[] contributions){
+        double weight = weight(contributions);
+        double potential = 0;
+        for (int i = 0; i < contributions.length; i++) {
+            potential += Math.pow(contributions[i]-weight/Network.size(), 2);
+        }
+        return potential;
     }
 
     private void writeToDisc() {
         StringBuilder valuesString = new StringBuilder();
+
         // Write buffer to string
         for (int j = 0; j <= CommonState.getIntTime() % bufferSize; j++) {
             for (int i = 0; i < Network.size(); i++) {
@@ -81,7 +119,7 @@ public class InputLogger implements Control {
         }
 
         try {
-            Files.write(Paths.get(outputDir + inputsLogfile),
+            Files.write(Paths.get(outputDir + weightsLogfile),
                     (valuesString.toString()).getBytes(), StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.err.println("Could not write to file.");
