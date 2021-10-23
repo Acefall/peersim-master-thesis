@@ -1,14 +1,13 @@
 // Author: Alexander Weinmann uni@aweinmann.de
-package example.pullSum;
+package example.pushSum;
 
 import approximation.Approximation;
-import approximation.SWApproximation;
 import example.AggregationProtocol;
 import example.HasContributions;
+import example.pullSum.HasWeight;
+import example.pullSum.PullSumVectorResponse;
 import messagePassing.Message;
 import messagePassing.MessagePassing;
-import messagePassing.randomCallModel.PullCall;
-import messagePassing.randomCallModel.PullProtocol;
 import messagePassing.randomCallModel.RandomCallModel;
 import peersim.cdsim.CDProtocol;
 import peersim.config.FastConfig;
@@ -18,13 +17,12 @@ import peersim.core.Node;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Pull Sum protocol inspired by Push Sum
  * Uses conservation of mass to converge to the true mean.
  */
-public class PullSumVector extends AggregationProtocol implements CDProtocol, Approximation, PullProtocol, HasWeight, HasContributions {
+public class PushSumVector extends AggregationProtocol implements CDProtocol, Approximation, HasWeight, HasContributions {
     protected final String name;
     private Double[] contributions;
     private int protocolID;
@@ -33,8 +31,7 @@ public class PullSumVector extends AggregationProtocol implements CDProtocol, Ap
         return contributions;
     }
 
-
-    public PullSumVector(String prefix) {
+    public PushSumVector(String prefix) {
         this.name = prefix;
         contributions = new Double[Network.size()];
     }
@@ -47,21 +44,35 @@ public class PullSumVector extends AggregationProtocol implements CDProtocol, Ap
             contributions[(int)node.getID()] = 1.0;
         }
 
+        if (CommonState.getIntTime() != 0) {
+            processInboundMessages(node, protocolID);
+        }
+
         // Get a random neighbour
         int linkableID = FastConfig.getLinkable(protocolID);
         RandomCallModel linkable = (RandomCallModel) node.getProtocol(linkableID);
         Node peer = linkable.getCommunicationPartner(node);
 
-
-        messagePassing.putOutboundMessage(new PullCall(node, peer, protocolID));
-        messagePassing.putOutboundMessage(new PullCall(node, node, protocolID));
-        if (CommonState.getIntTime() != 0) {
-            processResponses();
+        Double[] responseContributions =  new Double[Network.size()];
+        for (int i = 0; i < Network.size(); i++) {
+            responseContributions[i] = contributions[i]/2;
         }
+
+        messagePassing.putOutboundMessage(new PullSumVectorResponse(
+                node,
+                peer,
+                protocolID,
+                responseContributions));
+        messagePassing.putOutboundMessage(new PullSumVectorResponse(
+                node,
+                node,
+                protocolID,
+                responseContributions));
 
     }
 
-    private void processResponses() {
+
+    private void processInboundMessages(Node node, int protocolID) {
         Arrays.fill(contributions, 0.0);
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
@@ -77,31 +88,17 @@ public class PullSumVector extends AggregationProtocol implements CDProtocol, Ap
     }
 
     public Object clone() {
-        PullSumVector pullSum = new PullSumVector(name);
-        pullSum.messagePassing = new MessagePassing();
-        return pullSum;
+        PushSumVector pushSumVector = new PushSumVector(name);
+        pushSumVector.messagePassing = new MessagePassing();
+        return pushSumVector;
     }
 
-    @Override
-    public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {
-        Double[] responseContributions =  new Double[Network.size()];
-        for (int i = 0; i < Network.size(); i++) {
-            responseContributions[i] = contributions[i]/pullCalls.size();
-        }
-        for (Message pullCall : pullCalls) {
-            messagePassing.putOutboundMessage(new PullSumVectorResponse(
-                    node,
-                    pullCall.getSender(),
-                    protocolID,
-                    responseContributions));
-        }
-    }
 
     @Override
     public double getApproximation() {
         double dotProduct = 0;
         for (int i = 0; i < Network.size(); i++) {
-            PullSumVector protocol = (PullSumVector) Network.get(i).getProtocol(protocolID);
+            PushSumVector protocol = (PushSumVector) Network.get(i).getProtocol(protocolID);
             dotProduct += protocol.getInput() * contributions[i];
         }
         return dotProduct/getWeight();

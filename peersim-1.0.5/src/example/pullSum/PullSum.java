@@ -51,7 +51,6 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
 
 
         messagePassing.putOutboundMessage(new PullCall(node, peer, protocolID));
-        messagePassing.putOutboundMessage(new PullCall(node, node, protocolID));
         if (CommonState.getIntTime() != 0) {
             processResponses();
         }
@@ -59,8 +58,6 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
     }
 
     private void processResponses() {
-        setS(0);
-        setW(0);
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();
@@ -71,6 +68,7 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
                 messages.remove();
             }
         }
+
     }
 
     public Object clone() {
@@ -86,9 +84,11 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
                     node,
                     pullCall.getSender(),
                     protocolID,
-                    getS() / pullCalls.size(),
-                    getW() / pullCalls.size()));
+                    getS() / (pullCalls.size()+1),
+                    getW() / (pullCalls.size()+1)));
         }
+        setS(getS() / (pullCalls.size()+1));
+        setW(getW() / (pullCalls.size()+1));
     }
 
     @Override

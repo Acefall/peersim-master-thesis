@@ -22,10 +22,16 @@ public class InputLogger extends BufferedLogger{
             double input = protocol.getInput();
             try{
                 bufferedWriter.write(String.valueOf(input));
-                bufferedWriter.newLine();
+                bufferedWriter.write(",");
             }catch(IOException e){
                 System.out.println("Could not write to file.");
             }
         }
+        try{
+            bufferedWriter.newLine();
+        }catch(IOException e){
+            System.out.println("Could not write to file.");
+        }
+
     }
 }

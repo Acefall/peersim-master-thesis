@@ -25,7 +25,7 @@ public class IncrementalDataProvider implements IDataProvider {
     private LocalDateTime lastT;
     private final HashMap<String, Observation> lastObservations = new HashMap<String, Observation>();
 
-    private static final String PAR_DATA_Source = "dataSource";
+    private static final String PAR_DATA_SOURCE = "dataSource";
     private static final String PAR_INIT_VALID_DURATION = "initValidDuration";
     private static final String PAR_VALID_DURATION = "validDuration";
     private static final String PAR_DEFAULT_NA = "defaultNaN";
@@ -52,7 +52,7 @@ public class IncrementalDataProvider implements IDataProvider {
     public IncrementalDataProvider(String name){
         this.mapping = new FCFSMapping();
         this.n = Network.size();
-        dataSource = (IDataSource) Configuration.getInstance(name + "." + PAR_DATA_Source);
+        dataSource = (IDataSource) Configuration.getInstance(name + "." + PAR_DATA_SOURCE);
         initValidDuration = Duration.ofMillis(Configuration.getInt(name + "." + PAR_INIT_VALID_DURATION));
         validDuration = Duration.ofMillis(Configuration.getInt(name + "." + PAR_VALID_DURATION));
         defaultNa = Configuration.getDouble(name + "." + PAR_DEFAULT_NA, Double.NaN);

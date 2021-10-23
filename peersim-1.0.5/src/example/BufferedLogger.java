@@ -24,8 +24,17 @@ public abstract class BufferedLogger implements Control {
         if(Configuration.contains("SIZE")){
             outputDir += "/"+Configuration.getInt("SIZE");
         }
+        if(Configuration.contains("KEEP_FUNCTION")){
+            outputDir += "/"+Configuration.getString("KEEP_FUNCTION");
+        }
         if(Configuration.contains("KEEP_RATIO")){
             outputDir += "/"+Configuration.getString("KEEP_RATIO");
+        }
+        if(Configuration.contains("LIMIT")){
+            outputDir += "/"+Configuration.getString("LIMIT");
+        }
+        if(Configuration.contains("MARGIN_OF_ERROR")){
+            outputDir += "/"+Configuration.getString("MARGIN_OF_ERROR");
         }
         if(Configuration.contains(("RUN"))){
             outputDir += "/"+Configuration.getInt("RUN");
@@ -64,15 +73,17 @@ public abstract class BufferedLogger implements Control {
 
     @Override
     public boolean execute() {
-        writeToFile();
-
         if(CommonState.getPhase() == CommonState.POST_SIMULATION){
             try{
                 bufferedWriter.close();
             } catch(IOException e){
                 System.out.println("Could not close buffer.");
             }
+        }else{
+            writeToFile();
         }
+
+
         return false;
     }
 }

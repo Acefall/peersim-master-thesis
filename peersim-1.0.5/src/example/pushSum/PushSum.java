@@ -1,6 +1,7 @@
 package example.pushSum;
 
 import approximation.SWApproximation;
+import example.pullSum.HasWeight;
 import messagePassing.Message;
 import messagePassing.MessagePassing;
 import example.RandomLinkable;
@@ -20,7 +21,7 @@ import java.util.Iterator;
  * Uses conservation of mass to converge to the true mean.
  * Modified to allow for other rations when sending s and n.
  */
-public class PushSum extends SWApproximation implements CDProtocol, Approximation {
+public class PushSum extends SWApproximation implements CDProtocol, Approximation, HasWeight {
     private final String name;
     private final double keepRatio;
     private static final String PAR_KEEP_RATIO = "keepRatio";
@@ -51,13 +52,12 @@ public class PushSum extends SWApproximation implements CDProtocol, Approximatio
         RandomCallModel linkable = (RandomCallModel) node.getProtocol(linkableID);
         Node peer = linkable.getCommunicationPartner(node);
 
-        messagePassing.putOutboundMessage(new PushMessage(node, node, protocolID, keepRatio * getS(), keepRatio * getW()));
         messagePassing.putOutboundMessage(new PushMessage(node, peer, protocolID, (1-keepRatio) * getS(), (1-keepRatio) * getW()));
+        setS(keepRatio * getS());
+        setW(keepRatio * getW());
     }
 
     private void processInboundMessages(Node node, int protocolID) {
-        setS(0);
-        setW(0);
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();
@@ -73,5 +73,10 @@ public class PushSum extends SWApproximation implements CDProtocol, Approximatio
         PushSum pushSum = new PushSum(name);
         pushSum.messagePassing = new MessagePassing();
         return pushSum;
+    }
+
+    @Override
+    public double getWeight() {
+        return getW();
     }
 }

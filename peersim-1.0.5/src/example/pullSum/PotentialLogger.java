@@ -1,6 +1,7 @@
 package example.pullSum;
 
 import example.BufferedLogger;
+import example.HasContributions;
 import peersim.config.Configuration;
 import peersim.core.Network;
 
@@ -18,7 +19,7 @@ public class PotentialLogger extends BufferedLogger {
     protected void writeToFile() {
         try {
             for (int i = 0; i < Network.size(); i++) {
-                PullSumVector protocol = (PullSumVector) Network.get(i).getProtocol(protocolID);
+                HasContributions protocol = (HasContributions) Network.get(i).getProtocol(protocolID);
                 bufferedWriter.write(String.valueOf(potential(protocol.getContributions())));
                 bufferedWriter.write(",");
             }

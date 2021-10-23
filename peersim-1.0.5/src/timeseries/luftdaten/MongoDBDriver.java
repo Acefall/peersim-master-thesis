@@ -12,6 +12,7 @@ import peersim.config.Configuration;
 import timeseries.Observation;
 
 import static com.mongodb.client.model.Aggregates.*;
+import static com.mongodb.client.model.Sorts.ascending;
 
 import java.time.*;
 import java.util.*;
@@ -64,9 +65,12 @@ public class MongoDBDriver implements ILuftdatenDriver {
         // Get the last observation from each sensor_id
         Bson group = group("$sensor_id", Accumulators.last("last_observation", "$$ROOT"));
 
+        // Sort ids ascending
+        Bson sort = sort(ascending("sensor_id"));
+
         // Run the actual query
         AggregateIterable<Document> resultSet = collection.aggregate(Arrays.asList(
-                match, group
+                match, group, sort
         )).allowDiskUse(true);
 
         Document resultDoc = collection.aggregate(Arrays.asList(
