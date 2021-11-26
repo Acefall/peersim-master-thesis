@@ -5,8 +5,12 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.util.RandPermutation;
 
+/**
+ * Random phone call model with the constraint that every node has exactly one incoming call.
+ * This constraint represents a permutation. Every permutation is equally likely.
+ * */
 public class PermutationRandomCallModel implements RandomCallModel{
-    private RandPermutation permutation;
+    private final RandPermutation permutation;
 
     @Override
     public Node getCommunicationPartner(Node caller) {

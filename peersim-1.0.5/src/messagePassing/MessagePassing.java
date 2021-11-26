@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * Used by protocols using composition. Provides message passing functionality to a protocol.
+ * Provides message passing functionality to a protocol.
  */
 public class MessagePassing {
     private final HashSet<Message> inboundMessages = new HashSet<>();

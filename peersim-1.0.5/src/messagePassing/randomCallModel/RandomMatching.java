@@ -1,16 +1,15 @@
 package messagePassing.randomCallModel;
 
-import peersim.core.CommonState;
-import peersim.core.Network;
-
 import java.util.*;
 
+/**
+ * Generates a random matching between integers. Every matching is equally likely.
+ * */
 public class RandomMatching {
+    private final HashMap<Integer, Integer> matching = new HashMap<>();
+    private final Random random;
 
-    private HashMap<Integer, Integer> matching = new HashMap<>();
-    private Random random;
-
-    public RandomMatching(int n, Random random){
+    public RandomMatching(Random random){
         this.random = random;
     }
 

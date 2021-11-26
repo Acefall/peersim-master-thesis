@@ -1,8 +1,8 @@
 // Author: Alexander Weinmann uni@aweinmann.de
 package timeseries;
 
-import approximation.Approximation;
-import approximation.ErrorStats;
+import protocols.approximation.Approximation;
+import protocols.approximation.ErrorStats;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;

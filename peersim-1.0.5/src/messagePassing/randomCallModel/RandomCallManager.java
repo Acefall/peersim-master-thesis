@@ -3,7 +3,6 @@ package messagePassing.randomCallModel;
 import messagePassing.MPProtocol;
 import messagePassing.Message;
 import messagePassing.MessageManager;
-import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -12,8 +11,15 @@ import peersim.core.Protocol;
 
 import java.util.*;
 
+/**
+ * Collects all outgoing pull calls and forwards them to the recipient.
+ * */
 public class RandomCallManager extends MessageManager {
+    /**
+     * Parameter that defines whether RPULL is used or not.
+     */
     private static final String PAR_RPULL = "rpull";
+    /** Whether RPULL is used or not, obtained from config property {@link #PAR_RPULL}. */
     private final boolean rpull;
 
     private final Map<Node, List<PullCall>> pullCalls = new HashMap<>();

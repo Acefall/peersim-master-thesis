@@ -6,6 +6,7 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import peersim.config.Configuration;
@@ -68,39 +69,55 @@ public class MongoDBDriver implements ILuftdatenDriver {
         // Sort ids ascending
         Bson sort = sort(ascending("sensor_id"));
 
+        // Replace the root document with the last observation
+        Bson replaceRoot = replaceRoot("$last_observation");
+
+        // Only return relevant fields
+        Bson project = project(Projections.include(Arrays.asList(
+                "sensor_id", "timestamp", environmentVariable
+        )));
+
         // Run the actual query
         AggregateIterable<Document> resultSet = collection.aggregate(Arrays.asList(
-                match, group, sort
+                match, group, sort, replaceRoot
         )).allowDiskUse(true);
-
-        Document resultDoc = collection.aggregate(Arrays.asList(
-                match, group
-        )).allowDiskUse(true).first();
 
         HashMap<String, Observation> measurements = new HashMap<String, Observation>();
 
         for (Document doc : resultSet) {
             Double measurement;
             try {
-                measurement = (Double) doc.get("last_observation", Document.class).get(environmentVariable);
+                Object measurementObject = doc.get(environmentVariable);
+
+                if(measurementObject instanceof Double){
+                    // Is Double
+                    measurement = (Double) measurementObject;
+                } else if(measurementObject instanceof Integer){
+                    // Is Integer
+                    measurement = ((Integer) measurementObject).doubleValue();
+                }else{
+                    // Try anyways
+                    measurement = (Double )doc.get(environmentVariable);
+                }
+
                 if (measurement == null) {
                     throw new Exception("Measurement is null");
                 }
             } catch (Exception e) {
-                System.err.println("Failed to convert measurement to double");
+                System.err.println("Failed to convert measurement to double. Measurement was: " + doc.get(environmentVariable));
                 measurement = Double.NaN;
             }
 
             LocalDateTime tObs;
             try {
-                Date timestamp = (Date) doc.get("last_observation", Document.class).get("timestamp");
+                Date timestamp = (Date) doc.get("timestamp");
                 tObs = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.of("UTC"));
             } catch (Exception e) {
                 System.err.println("Failed to parse timestamp");
                 throw e;
             }
 
-            measurements.put(doc.get("_id").toString(), new Observation(tObs, measurement));
+            measurements.put(doc.get("sensor_id").toString(), new Observation(tObs, measurement));
         }
 
         return measurements;

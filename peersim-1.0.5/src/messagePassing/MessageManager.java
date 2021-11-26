@@ -13,26 +13,15 @@ import java.util.Iterator;
  */
 public class MessageManager implements Control {
     /**
-     * The protocol to operate on.
-     *
-     * @config
+     * Parameter that defines the protocol to operate on.
      */
     private static final String PAR_PROT = "protocol";
 
-    /**
-     * The name of this observer in the configuration file. Initialized by the
-     * constructor parameter.
-     */
-    private final String name;
-
-    /**
-     * Protocol identifier, obtained from config property {@link #PAR_PROT}.
-     */
+    /** Protocol identifier, obtained from config property {@link #PAR_PROT}. */
     protected final int pid;
 
 
     public MessageManager(String name) {
-        this.name = name;
         pid = Configuration.getPid(name + "." + PAR_PROT);
     }
 

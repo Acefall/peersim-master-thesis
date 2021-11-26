@@ -1,16 +1,18 @@
 package messagePassing.randomCallModel;
 
-import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
 import peersim.core.Node;
 
-
+/**
+ * Random phone call model with the constraint that if node u calls v, also v calls u.
+ * Every pair is equally likely.
+ * */
 public class MatchingRandomCallModel implements RandomCallModel{
-    private RandomMatching randomMatching;
+    private final RandomMatching randomMatching;
 
     public MatchingRandomCallModel(String name){
-        randomMatching = new RandomMatching(Network.size(), CommonState.r);
+        randomMatching = new RandomMatching(CommonState.r);
         randomMatching.generateMatching(Network.size());
     }
 

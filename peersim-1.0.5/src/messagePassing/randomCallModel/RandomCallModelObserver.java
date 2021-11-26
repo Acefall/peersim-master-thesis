@@ -1,12 +1,12 @@
 package messagePassing.randomCallModel;
 
-
-import messagePassing.randomCallModel.RandomCallModel;
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 
+/**
+ * Generates a new mapping from every node to another node in every round.
+ * */
 public class RandomCallModelObserver implements Control {
     /**
      * Parameter that defines the protocol to operate on.
