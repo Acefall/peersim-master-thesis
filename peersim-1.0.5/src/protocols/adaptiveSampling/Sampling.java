@@ -9,17 +9,19 @@ import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import protocols.AggregationProtocol;
+import protocols.sampling.CircularBuffer;
 
 import java.util.*;
 
 public class Sampling extends AggregationProtocol {
     protected final String name;
-    protected final List<Sample> samples;
+    protected final CircularBuffer<Sample> samples;
 
-    public Sampling(String name) {
+    public Sampling(String name, int bufferSize) {
         this.name = name;
-        samples = new ArrayList<>();
+        samples = new CircularBuffer<>(bufferSize);
     }
+
 
 
     public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {
@@ -59,7 +61,7 @@ public class Sampling extends AggregationProtocol {
 
 
     public double getApproximation(int sampleSize) {
-        if(samples.size() == 0){
+        if(samples.count() == 0){
             return getInput();
         }
 
@@ -67,10 +69,10 @@ public class Sampling extends AggregationProtocol {
         double sum = 0;
 
         Sample sample;
-        ListIterator<Sample> it = samples.listIterator(samples.size());
+        Iterator<Sample> it = samples.iterator();
 
-        while (it.hasPrevious()){
-            sample = it.previous();
+        while (it.hasNext()){
+            sample = it.next();
             sum += sample.getValue();
             sampleCount++;
 

@@ -24,7 +24,7 @@ public class PullSumImitatePushSum extends PullSum implements CDProtocol, Approx
 
     @Override
     public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {
-        HashSet<PullSumResponse> replies = new HashSet<>();
+        /*HashSet<PullSumResponse> replies = new HashSet<>();
         if (pullCalls.size() > 1) { // s and w have to be split among multiple calls
             boolean servedMyself = false; // indicates whether a pull call from myself is already answered
             Collections.shuffle(pullCalls, CommonState.r);
@@ -65,7 +65,24 @@ public class PullSumImitatePushSum extends PullSum implements CDProtocol, Approx
                     protocolID,
                     getS(),
                     getW()));
+        }*/
+
+        Collections.shuffle(pullCalls, CommonState.r);
+        for (int i = 1; i <= pullCalls.size(); i++) {
+            PullCall pullCall = pullCalls.get(i-1);
+            messagePassing.putOutboundMessage(
+                    new PullSumResponse(
+                        node,
+                        pullCall.getSender(),
+                        protocolID,
+                        getS()/Math.pow(2, i),
+                        getW()/Math.pow(2, i)
+                    )
+            );
         }
+
+        setS(getS()/Math.pow(2, pullCalls.size()));
+        setW(getW()/Math.pow(2, pullCalls.size()));
     }
 
     public Object clone() {

@@ -22,6 +22,8 @@ import protocols.AggregationProtocol;
 import peersim.config.*;
 import peersim.core.*;
 
+import java.util.Random;
+
 /**
  * Sets the input of every node to a value independently sampled from a specified interval.
  * */
@@ -41,6 +43,7 @@ public class RandomUniformInitializer implements Control {
      */
     private static final String PAR_PROT = "protocol";
 
+    private static final String PAR_SEED = "seed";
 
     /** Maximum interval value,
      obtained from config property {@link #PAR_MAX}. */
@@ -54,15 +57,18 @@ public class RandomUniformInitializer implements Control {
      * Defaults to -max. */
     protected final int protocolID;
 
+    private Random random =  new Random();
+
     public RandomUniformInitializer(String prefix) {
         max = Configuration.getDouble(prefix + "." + PAR_MAX);
         min = Configuration.getDouble(prefix + "." + PAR_MIN, -max);
         protocolID = Configuration.getPid(prefix + "." + PAR_PROT);
+        random.setSeed(Configuration.getInt(prefix + "." + PAR_SEED));
     }
 
     public boolean execute() {
         for (int i = 0; i < Network.size(); ++i) {
-            double randomDouble = min + (max - min) * CommonState.r.nextDouble();
+            double randomDouble = min + (max - min) * random.nextDouble();
             AggregationProtocol aggregationProtocol = (AggregationProtocol) Network.get(i).getProtocol(protocolID);
             aggregationProtocol.setInput(randomDouble);
         }

@@ -12,9 +12,15 @@ public class ConstantSamplingRate extends Sampling implements CDProtocol, Approx
     private static String PAR_SAMPLING_RATE = "samplingRate";
     private final double samplingRate;
 
+    private static String PAR_SAMPLE_SIZE = "sampleSize";
+    private final int sampleSize;
+
+    private int samplesCollected = 0;
+
     public ConstantSamplingRate(String name) {
-        super(name);
+        super(name, 50);
         samplingRate = Configuration.getDouble(name + "." + PAR_SAMPLING_RATE);
+        sampleSize = Configuration.getInt(name + "." + PAR_SAMPLE_SIZE);
     }
 
     @Override
@@ -22,7 +28,8 @@ public class ConstantSamplingRate extends Sampling implements CDProtocol, Approx
         processResponses();
 
         int targetSamples = (int) Math.ceil((CommonState.getIntTime()+1)*samplingRate);
-        requestSamples(node, protocolID, targetSamples - samples.size());
+        requestSamples(node, protocolID, targetSamples - samplesCollected);
+        samplesCollected = targetSamples;
     }
 
     @Override
@@ -34,6 +41,6 @@ public class ConstantSamplingRate extends Sampling implements CDProtocol, Approx
 
     @Override
     public double getApproximation() {
-        return super.getApproximation(50);
+        return super.getApproximation(sampleSize);
     }
 }

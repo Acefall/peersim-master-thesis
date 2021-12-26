@@ -10,6 +10,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Synthetic data source where all values of the sensors follow a sine wave. Each node u has an offset r_u which is
@@ -22,19 +23,22 @@ public class SineUniform implements IDataSource {
      * Name of the config parameter that specifies the period
      */
     private static final String PARAMETER_PERIOD = "period";
+    private static final String PAR_SEED = "seed";
 
 
     private final int n;
     private final double period;
     HashMap<String, Double> offsets = new HashMap<>();
+    private Random random = new Random();
 
 
-    public SineUniform(double period, int n) {
+    public SineUniform(double period, int n, int seed) {
         this.period = period;
         this.n = n;
+        random.setSeed(seed);
 
         for (int i = 0; i < Network.size(); ++i) {
-            double randomDouble = -1 + 2 * CommonState.r.nextDouble();
+            double randomDouble = -1 + 2 * random.nextDouble();
             offsets.put(Integer.toString(i), randomDouble);
         }
     }
@@ -42,9 +46,10 @@ public class SineUniform implements IDataSource {
     public SineUniform(String name) {
         period = Configuration.getDouble(name + "." + PARAMETER_PERIOD);
         n = Network.size();
+        random.setSeed(Configuration.getInt(name + "." + PAR_SEED));
 
         for (int i = 0; i < Network.size(); ++i) {
-            double randomDouble = -1 + 2 * CommonState.r.nextDouble();
+            double randomDouble = -1 + 2 * random.nextDouble();
             offsets.put(Integer.toString(i), randomDouble);
         }
     }

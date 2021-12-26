@@ -30,12 +30,11 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
     private int largestWakeUpId = 0;
     private double lastAlertApproximation = 0;
     private double lastApproximation = 0;
-    private int lastAlertTime = 0;
     private int nextWaitTime = 1;
     private int nextSampleInRound = 0;
 
     public ActiveAndRelaxed(String name) {
-        super(name);
+        super(name, Configuration.getInt(name + "." + PAR_SAMPLE_SIZE));
         maxSamplingRate = Configuration.getInt(name + "." + PAR_MAX_SAMPLING_RATE);
         sampleSize = Configuration.getInt(name + "." + PAR_SAMPLE_SIZE);
     }
@@ -120,7 +119,6 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
 
 
             lastAlertApproximation = newApproximation;
-            lastAlertTime = CommonState.getIntTime();
         }
         lastApproximation = newApproximation;
 

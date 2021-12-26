@@ -16,7 +16,7 @@ public class DerivativeOfTheMean extends Sampling implements CDProtocol, Approxi
     private final double messageIntensity;
 
     public DerivativeOfTheMean(String name) {
-        super(name);
+        super(name, 50);
         messageIntensity = Configuration.getDouble(name + "." + PAR_MESSAGE_INTENSITY);
     }
 

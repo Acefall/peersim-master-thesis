@@ -11,6 +11,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Synthetic data source which has a change point every 'period' number of rounds.
@@ -27,6 +28,7 @@ public class PeriodicUniform implements IDataSource {
     private static final String PAR_A2 = "a2";
     private static final String PAR_B2 = "b2";
     private static final String PAR_PERIOD = "period";
+    private static final String PAR_SEED = "seed";
 
 
     private final int n;
@@ -38,14 +40,16 @@ public class PeriodicUniform implements IDataSource {
     HashMap<String, Observation> data = new HashMap<>();
     private int calls = 0;
     private boolean cycleA = true;
+    private Random random = new Random();
 
-    public PeriodicUniform(double a1, double b1, double a2, double b2, int period, int n) {
+    public PeriodicUniform(double a1, double b1, double a2, double b2, int period, int n, int seed) {
         this.n = n;
         this.a1 = a1;
         this.b1 = b1;
         this.a2 = a2;
         this.b2 = b2;
         this.period = period;
+        this.random.setSeed(seed);
     }
 
     public PeriodicUniform(String name) {
@@ -55,6 +59,7 @@ public class PeriodicUniform implements IDataSource {
         a2 = Configuration.getDouble(name + "." + PAR_A2);
         b2 = Configuration.getDouble(name + "." + PAR_B2);
         period = Configuration.getInt(name + "." + PAR_PERIOD);
+        random.setSeed(Configuration.getInt(name + "." + PAR_SEED));
     }
 
 
@@ -74,7 +79,7 @@ public class PeriodicUniform implements IDataSource {
             }
 
             for (int i = 0; i < n; ++i) {
-                double randomDouble = min + (max - min) * CommonState.r.nextDouble();
+                double randomDouble = min + (max - min) * random.nextDouble();
                 data.put(Integer.toString(i), new Observation(t, randomDouble));
             }
         }

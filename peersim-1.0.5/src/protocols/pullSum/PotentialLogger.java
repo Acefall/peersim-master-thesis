@@ -26,12 +26,13 @@ public class PotentialLogger extends BufferedLogger {
     }
 
     protected void writeToFile() {
+        double sumPotential = 0;
+        for (int i = 0; i < Network.size(); i++) {
+            HasContributions protocol = (HasContributions) Network.get(i).getProtocol(protocolID);
+            sumPotential += potential(protocol.getContributions());
+        }
         try {
-            for (int i = 0; i < Network.size(); i++) {
-                HasContributions protocol = (HasContributions) Network.get(i).getProtocol(protocolID);
-                bufferedWriter.write(String.valueOf(potential(protocol.getContributions())));
-                bufferedWriter.write(",");
-            }
+            bufferedWriter.write(String.valueOf(sumPotential));
             bufferedWriter.newLine();
         }catch(IOException e){
             System.out.println("Could not write to file.");

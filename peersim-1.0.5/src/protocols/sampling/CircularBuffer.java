@@ -13,6 +13,9 @@ public class CircularBuffer<T> {
     public CircularBuffer(int size){
         this.size = size;
         elements = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            elements.add(null);
+        }
     }
 
     public void add(T element){
