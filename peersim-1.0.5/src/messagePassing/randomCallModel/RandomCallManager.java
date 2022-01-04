@@ -52,7 +52,7 @@ public class RandomCallManager extends MessageManager {
                 PullProtocol pullProtocol = (PullProtocol) protocol;
 
                 if(callee.isUp()){
-                    if(rpull){
+                    if(rpull && pullCalls.get(callee).size() > 0){
                         List<PullCall> restrictedPullCalls = new ArrayList<>();
                         int randomIndex = CommonState.r.nextInt(pullCalls.get(callee).size());
                         PullCall randomPullCall = pullCalls.get(callee).get(randomIndex);

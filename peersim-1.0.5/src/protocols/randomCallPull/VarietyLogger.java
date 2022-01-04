@@ -3,46 +3,26 @@ package protocols.randomCallPull;
 import messagePassing.MPProtocol;
 import messagePassing.Message;
 import messagePassing.randomCallModel.PullCall;
+import outputs.BufferedLogger;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
 
-import java.io.File;
+
 import java.io.IOException;
-import java.nio.file.*;
 import java.util.*;
 
-public class VarietyObserver implements Control {
+public class VarietyLogger extends BufferedLogger implements Control {
     /**
      * Parameter that defines the protocol to operate on.
      */
     private static final String PAR_PROT = "protocol";
-    /**
-     * Parameter that defines the output directory.
-     */
-    private static final String PAR_OUTPUT_DIR = "outputDir";
-
 
     /**
      * Protocol identifier, obtained from config property {@link #PAR_PROT}.
      */
     private final int protocolID;
-
-    /**
-     * The name of the output file for the varieties.
-     */
-    private final String varietyLogfile = "/varieties.csv";
-
-    /**
-     * The name of the output file for the maximum scaling factors.
-     */
-    private final String maxScalingFactorLogfile = "/maximumScalingFactor.csv";
-
-    /**
-     * The directory in which the output file is saved, obtained from {@link #PAR_OUTPUT_DIR}.
-     */
-    private final String outputDir;
 
 
     /**
@@ -57,12 +37,9 @@ public class VarietyObserver implements Control {
      *
      * @param name As named in the configuration file
      */
-    public VarietyObserver(String name) {
+    public VarietyLogger(String name) {
+        super(name);
         protocolID = Configuration.getPid(name + "." + PAR_PROT);
-        outputDir = Configuration.getString(PAR_OUTPUT_DIR);
-        File dir = new File(outputDir);
-        dir.mkdirs();
-
 
         buffer = new HashMap<>();
         for (int i = 0; i < Network.size(); i++) {
@@ -71,32 +48,12 @@ public class VarietyObserver implements Control {
             buffer.get(node).put(node, 1L);
         }
         commit();
-
-
-        Path pathVarieties = Paths.get(outputDir + varietyLogfile);
-        Path pathMaxScalings = Paths.get(outputDir + maxScalingFactorLogfile);
-        try {
-            Files.createFile(pathVarieties);
-            Files.createFile(pathMaxScalings);
-        } catch (FileAlreadyExistsException ex) {
-            System.err.println("File already exists. Truncating.");
-            try {
-                Files.write(pathVarieties, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-                Files.write(pathMaxScalings, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException e) {
-                System.err.println("Could not truncate the file");
-            }
-        } catch (IOException e) {
-            System.err.println("Could not create the file.");
-        }
-
-
     }
 
     /**
      * Update the varieties based on this message.
      *
-     * @param m
+     * @param m The message that is to be counted
      */
     public void countMessage(Message m) {
         for (var entry : varieties.get(m.getSender()).entrySet()) {
@@ -150,53 +107,56 @@ public class VarietyObserver implements Control {
             }
         }
         commit();
-        try {
-            Files.write(Paths.get(outputDir + varietyLogfile),
-                    (this.toString() + "\n").getBytes(), StandardOpenOption.APPEND);
-            Files.write(Paths.get(outputDir + maxScalingFactorLogfile),
-                    (maxScalingFactorToString() + "\n").getBytes(), StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            System.err.println("Could not write to file.");
-        }
+        writeToFile();
         return false;
     }
 
-    /**
-     * Build a string of maximum scaling factors of all nodes.
-     *
-     * @return the comma separated maximum scaling factors
-     */
-    public String maxScalingFactorToString() {
-        StringBuilder result = new StringBuilder();
+    public void writeMaxScalingFactors() {
         for (int i = 0; i < Network.size(); i++) {
             Node node = Network.get(i);
-            if (!varieties.containsKey(node)) {
-                result.append(0);
-            } else {
-                result.append(Collections.max(varieties.get(node).values()));
+            try{
+                if (!varieties.containsKey(node)) {
+                    bufferedWriter.write(String.valueOf(0));
+                } else {
+                    bufferedWriter.write(String.valueOf(Collections.max(varieties.get(node).values())));
+                }
+                bufferedWriter.write(",");
+            }catch(IOException e){
+                System.out.println("Could not write to file.");
             }
-            result.append(",");
         }
-        return result.toString();
+        try{
+            bufferedWriter.newLine();
+        }catch(IOException e){
+            System.out.println("Could not write to file.");
+        }
     }
 
-    /**
-     * Build a string of the varieties of all nodes.
-     *
-     * @return the comma separated varieties
-     */
-    public String toString() {
-        StringBuilder result = new StringBuilder();
+
+    public void writeVarieties() {
         for (int i = 0; i < Network.size(); i++) {
             Node node = Network.get(i);
-            if (!varieties.containsKey(node)) {
-                result.append(0);
-            } else {
-                result.append(varieties.get(node).size());
+            try{
+                if (!varieties.containsKey(node)) {
+                    bufferedWriter.write(String.valueOf(0));
+                } else {
+                    bufferedWriter.write(String.valueOf(varieties.get(node).size()));
+                }
+                bufferedWriter.write(",");
+            }catch(IOException e){
+                System.out.println("Could not write to file.");
             }
-            result.append(",");
         }
-        return result.toString();
+        try{
+            bufferedWriter.newLine();
+        }catch(IOException e){
+            System.out.println("Could not write to file.");
+        }
     }
 
+    @Override
+    protected void writeToFile() {
+        writeVarieties();
+        writeMaxScalingFactors();
+    }
 }
