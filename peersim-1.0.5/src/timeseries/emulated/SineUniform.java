@@ -10,6 +10,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -56,7 +57,7 @@ public class SineUniform implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         HashMap<String, Observation> result = new HashMap<String, Observation>();
         for (int i = 0; i < n; i++) {
             result.put(Integer.toString(i), new Observation(t, Math.sin(CommonState.getTime() * 2 * Math.PI / period) +

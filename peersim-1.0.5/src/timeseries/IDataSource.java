@@ -3,7 +3,7 @@
 package timeseries;
 
 import java.time.*;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides a mapping from sensor ids to observations.
@@ -12,6 +12,7 @@ import java.util.HashMap;
 public interface IDataSource {
     /**
      * Returns all data points available at time t
+     * @return
      */
-	HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration);
+	Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration);
 }

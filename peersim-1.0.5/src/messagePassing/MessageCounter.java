@@ -26,7 +26,6 @@ public class MessageCounter extends BufferedLogger implements Control {
 
     @Override
     protected void writeToFile() {
-
         double countMessages = 0;
         for (int i = 0; i < Network.size(); i++) {
             MPProtocol protocol = (MPProtocol) Network.get(i).getProtocol(protocolID);

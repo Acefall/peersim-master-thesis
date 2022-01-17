@@ -3,7 +3,6 @@ package timeseries.emulated;
 
 
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Network;
 import timeseries.IDataSource;
 import timeseries.Observation;
@@ -11,6 +10,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -64,7 +64,7 @@ public class PeriodicUniform implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         if (calls % period == 0) {
             cycleA = !cycleA;
             data.clear();

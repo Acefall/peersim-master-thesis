@@ -11,16 +11,17 @@ import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
 import protocols.approximation.Approximation;
+import timeseries.EpochProtocol;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximation, PullProtocol {
-    private double marginOfError = 0.05;
-    private int maxWaitTime = 32;
+public class ActiveAndRelaxed extends Sampling implements EpochProtocol, CDProtocol, Approximation, PullProtocol {
+    private double marginOfError;
+    private int maxWaitTime;
 
-    private static String PAR_SAMPLE_SIZE = "sampleSize";
-    private final int sampleSize;
+    private static String PAR_MAX_WAIT_TIME = "maxWaitTime";
+    private static String PAR_MARGIN_OF_ERROR = "marginOfError";
 
     private static String PAR_MAX_SAMPLING_RATE = "maxSamplingRate";
     private final int maxSamplingRate;
@@ -34,12 +35,13 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
     private int nextSampleInRound = 0;
 
     public ActiveAndRelaxed(String name) {
-        super(name, Configuration.getInt(name + "." + PAR_SAMPLE_SIZE));
+        super(name, Configuration.getInt(name + "." + PAR_MAX_SAMPLING_RATE));
         maxSamplingRate = Configuration.getInt(name + "." + PAR_MAX_SAMPLING_RATE);
-        sampleSize = Configuration.getInt(name + "." + PAR_SAMPLE_SIZE);
+        maxWaitTime = Configuration.getInt(name + "." + PAR_MAX_WAIT_TIME);
+        marginOfError = Configuration.getDouble(name + "." + PAR_MARGIN_OF_ERROR);
     }
 
-    private void processResponses(Node node, int protocolID) {
+    public void processInboundMessages(Node node, int protocolID) {
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();
@@ -50,7 +52,7 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
             }
         }
 
-        super.processResponses();
+        super.processInboundMessages(node, protocolID);
     }
 
     protected void randomWakeUpCalls(Node node, int protocolID, int numberOfWakeUps, int largestWakeUpId) {
@@ -91,8 +93,6 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        processResponses(node, protocolID);
-
         double newApproximation = getApproximation();
         double relativeErrorLastAlert = Math.abs((newApproximation - lastAlertApproximation)/lastAlertApproximation);
 
@@ -110,11 +110,10 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
 
         if(isAlert){
             double relativeErrorLastEstimate = Math.abs((newApproximation - lastApproximation)/lastApproximation);
-
             requestSamples(node, protocolID, (int) Math.floor(
                     Math.min(1,
                             Math.max(relativeErrorLastEstimate, relativeErrorLastAlert))
-                    ) * maxSamplingRate
+                     * maxSamplingRate)
             );
 
 
@@ -139,7 +138,7 @@ public class ActiveAndRelaxed extends Sampling implements CDProtocol, Approximat
 
     @Override
     public double getApproximation() {
-        return super.getApproximation(sampleSize);
+        return super.getApproximation(maxSamplingRate);
     }
 
     public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {

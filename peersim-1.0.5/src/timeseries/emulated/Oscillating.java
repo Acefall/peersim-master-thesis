@@ -2,15 +2,14 @@
 package timeseries.emulated;
 
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Network;
 import timeseries.IDataSource;
 import timeseries.Observation;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Synthetic data source which has a change point every 'period' number of rounds.
@@ -49,7 +48,7 @@ public class Oscillating implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         HashMap<String, Observation> result = new HashMap<String, Observation>();
         for (int i = 0; i < n; i++) {
             if (cycleA) {

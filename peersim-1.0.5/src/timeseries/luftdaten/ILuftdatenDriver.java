@@ -7,10 +7,11 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 
 public interface ILuftdatenDriver {
     /**
      * Returns all data points available at time t
      */
-    HashMap<String, Observation> valuesAt(LocalDateTime t, Duration validDuration, String sensorType, String environmentVariable);
+    Map<String, Observation> valuesAt(LocalDateTime t, Duration validDuration, String sensorType, String environmentVariable);
 }

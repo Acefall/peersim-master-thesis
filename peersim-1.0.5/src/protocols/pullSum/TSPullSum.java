@@ -2,6 +2,8 @@
 package protocols.pullSum;
 
 import messagePassing.randomCallModel.PullCall;
+import messagePassing.randomCallModel.PullProtocol;
+import messagePassing.randomCallModel.RandomCallModel;
 import protocols.approximation.Approximation;
 import protocols.approximation.SWApproximation;
 import network.RandomLinkable;
@@ -11,13 +13,15 @@ import peersim.cdsim.CDProtocol;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
+import timeseries.EpochProtocol;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Pull Sum protocol that is mass conserving even under changing inputs.
  */
-public class TSPullSum extends SWApproximation implements CDProtocol, Approximation {
+public class TSPullSum extends SWApproximation implements EpochProtocol, CDProtocol, Approximation, PullProtocol {
     private final String name;
     private double oldInput;
 
@@ -32,33 +36,19 @@ public class TSPullSum extends SWApproximation implements CDProtocol, Approximat
             setS(oldInput);
         }
 
+        double d = getInput() - oldInput;
+        setS(getS() + d);
+        oldInput = getInput();
+
         // Get a random neighbour
         int linkableID = FastConfig.getLinkable(protocolID);
-        RandomLinkable linkable = (RandomLinkable) node.getProtocol(linkableID);
-        Node peer = linkable.getRandomNeighbor();
+        RandomCallModel linkable = (RandomCallModel) node.getProtocol(linkableID);
+        Node peer = linkable.getCommunicationPartner(node);
 
-        if(CommonState.getIntTime() % 2 == 0){
-            messagePassing.putOutboundMessage(new PullCall(node, peer, protocolID));
-            messagePassing.putOutboundMessage(new PullCall(node, node, protocolID));
-            if (CommonState.getIntTime() != 0) {
-                processResponses();
-            }
-        }
-
-        if(CommonState.getIntTime() % 2 == 1){
-            double d = getInput() - oldInput;
-            setS(getS() + d);
-            oldInput = getInput();
-
-
-            processRequests(node, protocolID);
-        }
-
+        messagePassing.putOutboundMessage(new PullCall(node, peer, protocolID));
     }
-
-    private void processResponses(){
-        setS(0);
-        setW(0);
+    @Override
+    public void processInboundMessages(Node node, int protocolID) {
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();
@@ -71,38 +61,26 @@ public class TSPullSum extends SWApproximation implements CDProtocol, Approximat
         }
     }
 
-    private void processRequests(Node node, int protocolID){
-        // Count the number of requests in the inbox
-        int numPullRequests = 0;
-        Iterator<Message> messages = messagePassing.getInBoundMessages();
-        while (messages.hasNext()) {
-            Message message = messages.next();
-            if (message instanceof PullCall){
-                numPullRequests++;
-            }
-        }
-
-        // Answer the requests
-        messages = messagePassing.getInBoundMessages();
-        while (messages.hasNext()) {
-            Message message = messages.next();
-            if (message instanceof PullCall){
-                messagePassing.putOutboundMessage(new PullSumResponse(
-                        node,
-                        message.getSender(),
-                        protocolID,
-                        getS()/numPullRequests,
-                        getW()/numPullRequests));
-            }
-            messages.remove();
-        }
-    }
-
 
     public Object clone() {
         TSPullSum tsPullSum = new TSPullSum(name);
         tsPullSum.messagePassing = new MessagePassing();
         tsPullSum.setW(1);
         return tsPullSum;
+    }
+
+
+    @Override
+    public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {
+        for (Message pullCall : pullCalls) {
+            messagePassing.putOutboundMessage(new PullSumResponse(
+                    node,
+                    pullCall.getSender(),
+                    protocolID,
+                    getS() / (pullCalls.size()+1),
+                    getW() / (pullCalls.size()+1)));
+        }
+        setS(getS() / (pullCalls.size()+1));
+        setW(getW() / (pullCalls.size()+1));
     }
 }

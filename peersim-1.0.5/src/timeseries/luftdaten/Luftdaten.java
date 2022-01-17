@@ -2,10 +2,8 @@
 package timeseries.luftdaten;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
 
 import peersim.config.Configuration;
 import timeseries.IDataSource;
@@ -39,7 +37,7 @@ public class Luftdaten implements IDataSource {
     }
 
 
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         return this.driver.valuesAt(t, validDuration, this.sensorType, this.environmentVariable);
     }
 

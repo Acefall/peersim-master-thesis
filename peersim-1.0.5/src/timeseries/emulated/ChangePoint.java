@@ -9,6 +9,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Synthetic data source which has one change point. All sensors have the same value at all times.
@@ -45,7 +46,7 @@ public class ChangePoint implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         HashMap<String, Observation> result = new HashMap<String, Observation>();
         for (int i = 0; i < n; i++) {
             if (calls < changePoint) {

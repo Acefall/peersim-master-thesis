@@ -8,6 +8,7 @@ import timeseries.luftdaten.FCFSMapping;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Data provider for which calls have to be with increasing t.
@@ -60,7 +61,7 @@ public class IncrementalDataProvider implements IDataProvider {
 
     private void updateLastObservations(LocalDateTime t, Duration searchDuration) {
         lastT = t;
-        HashMap<String, Observation> sensorValues = dataSource.sensorValuesAt(t, searchDuration);
+        Map<String, Observation> sensorValues = dataSource.sensorValuesAt(t, searchDuration);
 
         for (var entry : sensorValues.entrySet()) {
             lastObservations.put(entry.getKey(), entry.getValue());

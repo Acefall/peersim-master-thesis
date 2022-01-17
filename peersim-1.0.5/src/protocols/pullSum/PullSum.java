@@ -63,7 +63,6 @@ public class PullSum extends SWApproximation implements CDProtocol, Approximatio
                 messages.remove();
             }
         }
-
     }
 
     public Object clone() {

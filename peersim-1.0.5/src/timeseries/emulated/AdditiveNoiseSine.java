@@ -9,6 +9,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class AdditiveNoiseSine implements IDataSource {
@@ -40,7 +41,7 @@ public class AdditiveNoiseSine implements IDataSource {
     }
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         if((CommonState.getIntTime() % timeLengthInRounds) == 0) {
             double min, max;
             double time = CommonState.getIntTime() / ((float) timeLengthInRounds);

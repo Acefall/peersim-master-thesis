@@ -9,21 +9,22 @@ import protocols.approximation.Approximation;
 
 
 public class DerivativeOfTheMean extends Sampling implements CDProtocol, Approximation, PullProtocol {
-    private static String PAR_MESSAGE_INTENSITY = "messageIntensity";
+    private static String PAR_SENSITIVITY = "sensitivity";
+    private static String PAR_MAX_SAMPLING_RATE = "maxSamplingRate";
 
     private double lastApproximation;
-    private final int goodSampleSize = 50;
-    private final double messageIntensity;
+    private final int maxSamplingRate;
+    private final double sensitivity;
 
     public DerivativeOfTheMean(String name) {
-        super(name, 50);
-        messageIntensity = Configuration.getDouble(name + "." + PAR_MESSAGE_INTENSITY);
+        super(name, Configuration.getInt(name + "." + PAR_MAX_SAMPLING_RATE));
+        sensitivity = Configuration.getDouble(name + "." + PAR_SENSITIVITY);
+        maxSamplingRate = Configuration.getInt(name + "." + PAR_MAX_SAMPLING_RATE);
     }
 
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        processResponses();
         double newApproximation = getApproximation();
         double absoluteDerivative = Math.abs(newApproximation - lastApproximation);
         lastApproximation = newApproximation;
@@ -31,8 +32,8 @@ public class DerivativeOfTheMean extends Sampling implements CDProtocol, Approxi
         double samplesToRequest = Math.max(
                 1,
                 Math.min(
-                        goodSampleSize,
-                        Math.ceil(absoluteDerivative * goodSampleSize * messageIntensity)
+                        maxSamplingRate,
+                        Math.ceil(absoluteDerivative * sensitivity)
                 )
         );
 
@@ -48,8 +49,6 @@ public class DerivativeOfTheMean extends Sampling implements CDProtocol, Approxi
 
     @Override
     public double getApproximation() {
-        return super.getApproximation(goodSampleSize);
+        return super.getApproximation(maxSamplingRate);
     }
-
-
 }

@@ -9,6 +9,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 public class UniformNoise implements IDataSource {
     private static final String PAR_MIN = "min";
@@ -30,7 +31,7 @@ public class UniformNoise implements IDataSource {
     }
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         if(CommonState.getIntTime() % timeLengthInRounds == 0) {
             for (int i = 0; i < n; ++i) {
                 double randomDouble = min + (max - min) * CommonState.r.nextDouble();

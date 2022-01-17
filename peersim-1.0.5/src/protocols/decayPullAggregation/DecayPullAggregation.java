@@ -12,11 +12,12 @@ import peersim.core.CommonState;
 import peersim.core.Node;
 import protocols.AggregationProtocol;
 import protocols.approximation.Approximation;
+import timeseries.EpochProtocol;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class DecayPullAggregation extends AggregationProtocol implements CDProtocol, Approximation, PullProtocol {
+public class DecayPullAggregation extends AggregationProtocol implements EpochProtocol, CDProtocol, Approximation, PullProtocol {
     private final String name;
     private static final String PAR_HISTORY_WEIGHT = "historyWeight";
 
@@ -45,17 +46,7 @@ public class DecayPullAggregation extends AggregationProtocol implements CDProto
     @Override
     public void nextCycle(Node node, int protocolID) {
         if(CommonState.getIntTime() > 0) {
-            double sum = estimate;
-            int count = 1;
-            Iterator<Message> messages = messagePassing.getInBoundMessages();
-            while (messages.hasNext()) {
-                EstimationMessage estimationMessage = (EstimationMessage) messages.next();
-                sum += estimationMessage.getEstimation();
-                count++;
-                messages.remove();
-            }
-
-            estimate = historyWeight * (sum / count) + (1 - historyWeight) * getInput();
+            estimate = historyWeight * estimate + (1 - historyWeight) * getInput();
         }
 
         int linkableID = FastConfig.getLinkable(protocolID);
@@ -87,5 +78,21 @@ public class DecayPullAggregation extends AggregationProtocol implements CDProto
             estimate = input;
         }
         super.setInput(input);
+    }
+
+    @Override
+    public void processInboundMessages(Node node, int protocolID) {
+        double sum = estimate;
+        int count = 1;
+        Iterator<Message> messages = messagePassing.getInBoundMessages();
+        while (messages.hasNext()) {
+            EstimationMessage estimationMessage = (EstimationMessage) messages.next();
+            sum += estimationMessage.getEstimation();
+            count++;
+            messages.remove();
+        }
+
+        estimate = sum/count;
+
     }
 }

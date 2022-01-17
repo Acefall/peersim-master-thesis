@@ -2,15 +2,14 @@
 package timeseries.emulated;
 
 import peersim.config.Configuration;
-import peersim.core.CommonState;
 import peersim.core.Network;
 import timeseries.IDataSource;
 import timeseries.Observation;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Synthetic data source where all sensors have the same value for all rounds.
@@ -39,7 +38,7 @@ public class Constant implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         HashMap<String, Observation> result = new HashMap<String, Observation>();
         for (int i = 0; i < n; i++) {
             result.put(Integer.toString(i), new Observation(t, value));

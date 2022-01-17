@@ -14,11 +14,12 @@ import protocols.AggregationProtocol;
 import protocols.approximation.Approximation;
 import protocols.decayPullAggregation.EstimationMessage;
 import protocols.pushSum.PushMessage;
+import timeseries.EpochProtocol;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class DecayPushAggregation extends AggregationProtocol implements CDProtocol, Approximation {
+public class DecayPushAggregation extends AggregationProtocol implements EpochProtocol, CDProtocol, Approximation {
     private final String name;
     private static final String PAR_HISTORY_WEIGHT = "historyWeight";
 
@@ -30,7 +31,7 @@ public class DecayPushAggregation extends AggregationProtocol implements CDProto
         historyWeight = Configuration.getDouble(name + "." + PAR_HISTORY_WEIGHT);
     }
 
-    private void processInboundMessages(Node node, int protocolID) {
+    public void processInboundMessages(Node node, int protocolID) {
         double sum = estimate;
         int count = 1;
         Iterator<Message> messages = messagePassing.getInBoundMessages();
@@ -41,14 +42,12 @@ public class DecayPushAggregation extends AggregationProtocol implements CDProto
             messages.remove();
         }
 
-        estimate = historyWeight * (sum / count) + (1 - historyWeight) * getInput();
+        estimate = (sum / count);
     }
 
     @Override
     public void nextCycle(Node node, int protocolID) {
-        if(CommonState.getIntTime() > 0) {
-            processInboundMessages(node, protocolID);
-        }
+        estimate = historyWeight * estimate + (1 - historyWeight) * getInput();
 
         int linkableID = FastConfig.getLinkable(protocolID);
         RandomCallModel linkable = (RandomCallModel) node.getProtocol(linkableID);

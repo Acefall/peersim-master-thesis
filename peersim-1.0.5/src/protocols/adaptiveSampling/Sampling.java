@@ -10,10 +10,11 @@ import peersim.core.CommonState;
 import peersim.core.Node;
 import protocols.AggregationProtocol;
 import protocols.sampling.CircularBuffer;
+import timeseries.EpochProtocol;
 
 import java.util.*;
 
-public class Sampling extends AggregationProtocol {
+public class Sampling extends AggregationProtocol implements EpochProtocol {
     protected final String name;
     protected final CircularBuffer<Sample> samples;
 
@@ -21,7 +22,6 @@ public class Sampling extends AggregationProtocol {
         this.name = name;
         samples = new CircularBuffer<>(bufferSize);
     }
-
 
 
     public void processPullCalls(List<PullCall> pullCalls, Node node, int protocolID) {
@@ -37,7 +37,8 @@ public class Sampling extends AggregationProtocol {
         }
     }
 
-    protected void processResponses(){
+    @Override
+    public void processInboundMessages(Node node, int protocolID) {
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();
@@ -83,4 +84,6 @@ public class Sampling extends AggregationProtocol {
 
         return sum / sampleCount;
     }
+
+
 }

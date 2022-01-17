@@ -2,7 +2,6 @@
 package timeseries.emulated;
 
 
-import org.nfunk.jep.function.Str;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Network;
@@ -12,6 +11,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Synthetic data source where the value of a node never changes.
@@ -51,7 +51,7 @@ public class ConstantUniform implements IDataSource {
 
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         HashMap<String, Observation> sensorValues = new HashMap<>();
         for (int i = 0; i < n; ++i) {
             sensorValues.put(Integer.toString(i), new Observation(t, data.get(i)));

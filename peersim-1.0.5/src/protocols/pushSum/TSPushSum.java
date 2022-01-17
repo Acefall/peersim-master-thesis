@@ -11,6 +11,8 @@ import peersim.cdsim.CDProtocol;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
 import peersim.core.Node;
+import timeseries.EpochProtocol;
+import timeseries.TSProtocol;
 
 import java.util.Iterator;
 
@@ -18,7 +20,7 @@ import java.util.Iterator;
  * Push Sum protocol as described by Kempe et. al. extended for time series capabilities.
  * Uses conservation of mass to converge to the true mean.
  */
-public class TSPushSum extends SWApproximation implements CDProtocol, Approximation {
+public class TSPushSum extends SWApproximation implements EpochProtocol, CDProtocol, Approximation {
     private final String name;
     double oldInput;
 
@@ -42,10 +44,6 @@ public class TSPushSum extends SWApproximation implements CDProtocol, Approximat
             setS(oldInput);
         }
 
-        if (CommonState.getIntTime() != 0) {
-            processInboundMessages(node, protocolID);
-        }
-
         double d = getInput() - oldInput;
         setS(getS() + d);
         oldInput = getInput();
@@ -56,12 +54,11 @@ public class TSPushSum extends SWApproximation implements CDProtocol, Approximat
         Node peer = linkable.getCommunicationPartner(node);
 
         messagePassing.putOutboundMessage(new PushMessage(node, peer, protocolID, getS() / 2, getW() / 2));
-        messagePassing.putOutboundMessage(new PushMessage(node, node, protocolID, getS() / 2, getW() / 2));
+        setS(0.5 * getS());
+        setW(0.5 * getW());
     }
 
-    private void processInboundMessages(Node node, int protocolID) {
-        setS(0);
-        setW(0);
+    public void processInboundMessages(Node node, int protocolID) {
         Iterator<Message> messages = messagePassing.getInBoundMessages();
         while (messages.hasNext()) {
             Message message = messages.next();

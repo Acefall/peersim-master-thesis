@@ -9,6 +9,7 @@ import timeseries.Observation;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class AdditiveNoisePeriodic implements IDataSource {
@@ -40,10 +41,10 @@ public class AdditiveNoisePeriodic implements IDataSource {
     }
 
     @Override
-    public HashMap<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
+    public Map<String, Observation> sensorValuesAt(LocalDateTime t, Duration validDuration) {
         if((CommonState.getIntTime() % timeLengthInRounds) == 0) {
             double min, max;
-            if(Math.floor(CommonState.getIntTime() / ((float) (timeLengthInRounds * period))) % 2 == 0){
+            if(Math.floor(CommonState.getIntTime() / ((float) (timeLengthInRounds * period/2))) % 2 == 0){
                 min = mean1 - range/2;
                 max = mean1 + range/2;
             }else{
