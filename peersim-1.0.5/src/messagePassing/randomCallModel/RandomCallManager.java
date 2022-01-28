@@ -12,7 +12,8 @@ import peersim.core.Protocol;
 import java.util.*;
 
 /**
- * Collects all outgoing pull calls and forwards them to the recipient.
+ * Handles the message passing amongst the nodes.
+ * Collects push calls and pull calls and delivers them to the designated receiver.
  * */
 public class RandomCallManager extends MessageManager {
     /**

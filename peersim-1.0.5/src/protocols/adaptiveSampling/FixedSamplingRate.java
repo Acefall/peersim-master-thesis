@@ -7,7 +7,9 @@ import peersim.config.Configuration;
 import peersim.core.Node;
 import protocols.approximation.Approximation;
 import timeseries.EpochProtocol;
-
+/**
+ * Protocol that collects a fixed number of samples in every round.
+ * */
 public class FixedSamplingRate extends Sampling implements EpochProtocol, CDProtocol, Approximation, PullProtocol {
     private static String PAR_SAMPLING_RATE = "samplingRate";
     private static String PAR_SAMPLE_SIZE = "sampleSize";

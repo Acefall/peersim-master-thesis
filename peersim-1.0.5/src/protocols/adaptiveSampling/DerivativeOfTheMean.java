@@ -7,7 +7,9 @@ import peersim.config.Configuration;
 import peersim.core.Node;
 import protocols.approximation.Approximation;
 
-
+/**
+ * Protocol that collects samples based on the derivative of the estimate.
+ * */
 public class DerivativeOfTheMean extends Sampling implements CDProtocol, Approximation, PullProtocol {
     private static String PAR_SENSITIVITY = "sensitivity";
     private static String PAR_MAX_SAMPLING_RATE = "maxSamplingRate";

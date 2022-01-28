@@ -15,7 +15,11 @@ import timeseries.EpochProtocol;
 
 import java.util.Iterator;
 import java.util.List;
-
+/**
+ * Protocol that operates in two states. Awake and asleep. IN the asleep state samples with exponential backoff.
+ * In the awake state samples based on the relative change in estimate.
+ * When detecting a large relative change, wakes up and wakes up other nodes aswell.
+ * */
 public class ActiveAndRelaxed extends Sampling implements EpochProtocol, CDProtocol, Approximation, PullProtocol {
     private double marginOfError;
     private int maxWaitTime;

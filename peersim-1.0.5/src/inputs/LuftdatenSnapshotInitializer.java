@@ -11,8 +11,7 @@ import timeseries.IDataProvider;
 import java.time.LocalDateTime;
 
 /**
- * Uses a data provider to get the inputs to nodes for every round.
- * Updates the inputs of the nodes using that data.
+ * Uses a data provider to get the inputs to nodes in the frist round.
  */
 
 public class LuftdatenSnapshotInitializer implements Control {
